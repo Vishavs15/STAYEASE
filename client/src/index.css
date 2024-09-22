@@ -1,0 +1,14 @@
+@import 'tailwindcss/base';
+@import 'tailwindcss/components';
+@import 'tailwindcss/utilities';
+
+input[type="text"],input[type="password"],input[type="email"] {
+    @apply w-full border my-2 py-2 px-3 rounded-2xl;
+}
+
+button.primary{
+    @apply bg-primary text-white rounded-2xl w-full py-2 px-3 my-2;
+}
+Link.primaryLink {
+    @apply bg-primary text-white rounded-full py-3 px-3 my-2 w-1/4
+}
