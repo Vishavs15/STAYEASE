@@ -15,15 +15,15 @@ const Account = () => {
 
   async function logout() {
     await axios.post("/logout");
-    setUser(null);
     setRedirect("/");
+    setUser(null);
   }
 
   if (!ready) {
     return "Loading Info... ";
   }
 
-  if (ready && !user) {
+  if (ready && !user && !redirect) {
     return <Navigate to={"/login"} />;
   }
 
@@ -105,7 +105,7 @@ const Account = () => {
       {subpage === "account" && (
         <div className="text-center w-1/3 mx-auto mt-16">
           Logged in as {user.name} ({user.email})<br />
-          <button onClick={logout} className="primary">
+          <button onClick={logout} className="primary w-full">
             Logout
           </button>
         </div>
