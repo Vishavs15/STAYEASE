@@ -2,7 +2,7 @@
 @import 'tailwindcss/components';
 @import 'tailwindcss/utilities';
 
-input[type="text"],input[type="password"],input[type="email"], textarea{
+input[type="text"],input[type="password"],input[type="email"],input[type="number"], textarea{
     @apply w-full border my-2 py-2 px-3 rounded-2xl;
 }
 

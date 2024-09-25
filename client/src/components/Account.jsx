@@ -41,7 +41,7 @@ const Account = () => {
   }
 
   if (redirect) {
-    return <Navigate to={"redirect"} />;
+    return <Navigate to={redirect} />;
   }
 
   return (

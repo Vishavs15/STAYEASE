@@ -7,12 +7,16 @@ require("dotenv").config();
 const bcrypt = require("bcrypt");
 const jwt = require("jsonwebtoken");
 const cookieParser = require("cookie-parser");
+const imageDownloader = require('image-downloader');
+
+require('dotenv').config();
 
 const bcryptSalt = bcrypt.genSaltSync(12);
 const jwtSecret = "r93c8uKVU*&^gTVtb97t9";
 
 app.use(express.json());
 app.use(cookieParser());
+app.use('/uploads', express.static(__dirname+'/uploads'))
 app.use(
   cors({
     credentials: true,
@@ -87,6 +91,33 @@ app.get("/profile", (req, res) => {
     res.json(null);
   }
 });
+
+// ---------------------------------------------------------- PROFILE -------------------------------------------------------- 
+
+console.log({__dirname})
+app.post('/upload-by-link', async (req, res) => {
+  const { link } = req.body;
+  const newName = 'photo' + Date.now() + '.jpg';
+  
+  await imageDownloader.image({
+    url: link,
+    dest: __dirname + '/uploads/' + newName, // Add a slash before uploads this save img in to upload file 
+    timeout: 30000, // Increase timeout to 30 seconds
+  });
+
+  res.json({ fileName: newName }); // Return an object for consistency
+});
+
+// app.post('/upload-by-link', async (req, res) => {
+//   const {link} = req.body;
+//   const newName = 'photo' + Date.now() + '.jpg';
+//   await imageDownloader.image({
+//     url: link,
+//     dest: __dirname+'/uploads'+newName,
+//     timeout: 30000, // Increase timeout to 30 seconds
+//   });
+//   res.json(newName);
+// })
 
 app.listen(3000, () => {
   console.log("Server running on port 3000");

@@ -43,7 +43,7 @@ const LogIn = () => {
               value={password}
               onChange={(ev) => setPassword(ev.target.value)}
             />
-            <button className="primary">Login</button>
+            <button className="primary w-full">Login</button>
             <div className="flex gap-1 justify-center my-2">
               <p className="text-center">Don’t have an account yet?</p>
               <Link to="/SignIn">
