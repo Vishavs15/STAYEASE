@@ -43,28 +43,32 @@ const PlacesPage = () => {
     ev.preventDefault();
     try {
       const { data: filename } = await axios.post('/upload-by-link', { link: photoLink });
-      // console.log(filename) 
       setAddedPhotos((prev) => [...prev, filename.fileName]);
       // setAddedPhotos((prev) => { return [...prev, filename]});
-      // setPhotoLink('');
+      setPhotoLink('');
     } catch (error) {
       console.error("Error uploading photo:", error);
     }
   }
 
-  function uploadPhoto(ev) {
-    const files = ev.target.files;
-    const data = new FormData();
-    data.set('photos', files);
-    axios.post('/upload', data, {
-      header: {'Content-type':'multipart/form-data'}
-    }).then(response => {
-      const {data:filename} = response;
-      setAddedPhotos(per => {
-        return [...prev, filename.filename]
-      })
-    })
+function uploadPhoto(ev) {
+  const files = ev.target.files;
+  const data = new FormData();
+
+
+  for (let i = 0; i < files.length; i++) {  // Fixed `length` typo
+    data.append('photos', files[i]);
   }
+
+  axios.post('/upload', data, {
+    headers: { 'Content-Type': 'multipart/form-data' }  // Fixed `headers` typo
+  })
+  .then(response => {
+    let {data:filename} = response;
+    filename = filename[0].substring(7)
+    setAddedPhotos((prev) => [...prev, filename]);
+    })
+}
 
 {/* =================================================================================================================== */}
 
@@ -140,11 +144,12 @@ const PlacesPage = () => {
             <div className="gap-2 mt-2 grid grid-col-3 md:grid-cols-4 lg:grid-cols-6">
               {addedPhotos.length > 0 && addedPhotos.map((link) => (
                 <div key={link}>  {/* Using `link` as key for better uniqueness */}
-                  {(link) ? <img src={'http://localhost:3000/uploads/' + link} alt="" className="rounded-2xl" /> : <h1>link not fppund</h1>}
+                  {/* {(link) ? <img src={'http://localhost:3000/uploads/' + link} alt="" className="rounded-2xl" /> : <h1>link not found</h1>} */}
+                  <img src={'http://localhost:3000/uploads/' + link} alt="" className="rounded-2xl" />
                 </div>
               ))}
               <label className="border bg-transparent rounded-2xl p-8 text-2xl text-gray-600 bg-gray-300 flex justify-center gap-1">
-                <input type="file" className="hidden" onChange={uploadPhoto}/>
+                <input type="file" multiple className="hidden" onChange={uploadPhoto}/>
                 <svg
                   xmlns="http://www.w3.org/2000/svg"
                   fill="none"
