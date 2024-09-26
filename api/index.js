@@ -10,6 +10,7 @@ const cookieParser = require("cookie-parser");
 const imageDownloader = require('image-downloader');
 const multer = require('multer');
 const fs = require('fs');
+const Place = require("./models/Place");
 
 require('dotenv').config();
 
@@ -103,7 +104,7 @@ app.post('/upload-by-link', async (req, res) => {
   await imageDownloader.image({
     url: link,
     dest: __dirname + '/uploads/' + newName, // Add a slash before uploads this save img in to upload file 
-    timeout: 30000, // Increase timeout to 30 seconds
+    // timeout: 30000, // Increase timeout to 30 seconds
   });
 
   res.json({ fileName: newName }); // Return an object for consistency
@@ -124,6 +125,14 @@ app.post('/upload', photosMiddleware.array('photos', 100), (req,res) => {
   }
   res.json(uploadedFiles);
 });
+
+
+
+app.post('/places', (req, res) => {
+  Place.create({
+    
+  })
+})
 
 app.listen(3000, () => {
   console.log("Server running on port 3000");
