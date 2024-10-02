@@ -12,7 +12,7 @@ const multer = require('multer');
 const fs = require('fs');
 const Place = require("./models/Place");
 
-require('dotenv').config();
+require('dotenv').config(); 
 
 const bcryptSalt = bcrypt.genSaltSync(12);
 const jwtSecret = "r93c8uKVU*&^gTVtb97t9";
@@ -126,7 +126,7 @@ app.post('/upload', photosMiddleware.array('photos', 100), (req,res) => {
   res.json(uploadedFiles);
 });
 
-
+// ---------------------------------------------------------- PROFILE -------------------------------------------------------- 
 
 app.post('/places', (req, res) => {
   const {token} = req.cookies;

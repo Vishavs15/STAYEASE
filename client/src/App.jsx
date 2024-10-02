@@ -1,12 +1,13 @@
 import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
-import Index from "./components/Index";
-import LogIn from "./components/LogIn";
+import Index from "./pages/Index";
+import LogIn from "./pages/LogIn";
 import Layout from "./Layout";
-import SignIn from "./components/SignIn";
-import Account from "./components/Account";
-import PlacesPage from "./components/PlacesPage"; // Import PlacesPage
+import SignIn from "./pages/SignIn";
+import Profile from "./pages/Profile";
+import PlacesPage from "./pages/PlacesPage"; // Import PlacesPage
 import axios from "axios";
 import { UserContextProvider } from "./components/UserContext";
+import PlacesFormPage from "./pages/PlacesFormPage";
 
 // Set Axios defaults
 // axios.defaults.baseURL = "http://localhost3000"; this one has typo error
@@ -21,10 +22,9 @@ function App() {
           <Route index element={<Index />} />
           <Route path="/login" element={<LogIn />} />
           <Route path="/SignIn" element={<SignIn />} />
-          {/* Account Page Route */}
-          <Route path="/account/:subpage?" element={<Account />} />
-          {/* Places Page Route */}
-          <Route path="/account/places/:action?" element={<PlacesPage />}/>
+          <Route path="/account/:subpage?" element={<Profile />} />
+          <Route path="/account/places" element={<PlacesPage />}/>
+          <Route path="/account/places/new" element={<PlacesFormPage />}/>
           {/* This handles /places and /places/new */}
           {/* <Route path="*" element={<NotFound />}  /> */}
         </Route>
