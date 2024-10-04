@@ -12,3 +12,6 @@ button.primary{
 Link.primaryLink {
     @apply bg-primary text-white rounded-full py-3 px-3 my-2 w-1/4;
 }
+textarea {
+  min-height: 180px;
+}

@@ -51,21 +51,20 @@ const UploadPhoto = ({addedPhotos,onChange}) => {
         </button>
       </div>
 
-      <div className="gap-2 mt-2 grid grid-col-3 md:grid-cols-4 lg:grid-cols-6">
-        {addedPhotos.length > 0 &&
-          addedPhotos.map((link) => (
-            <div className="h-30 flex" key={link}>
+      <div className="gap-2 mt-2 grid grid-col-3 md:grid-cols-4 lg:grid-cols-6 max-h-35">
+        {addedPhotos.length > 0 && addedPhotos.map((link) => (
+            <div className="flex h-35" key={link}>
               {" "}
               {/* Using `link` as key for better uniqueness */}
               {/* {(link) ? <img src={'http://localhost:3000/uploads/' + link} alt="" className="rounded-2xl" /> : <h1>link not found</h1>} */}
               <img
                 src={"http://localhost:3000/uploads/" + link}
                 alt=""
-                className="rounded-2xl w-full object-cover"
+                className="rounded-2xl w-full object-cover h-35"
               />
             </div>
           ))}
-        <label className="cursor-pointer   border bg-transparent rounded-2xl p-8 text-2xl text-gray-600 bg-gray-300 flex justify-center gap-1">
+        <label className="max-h-35 cursor-pointer border bg-transparent rounded-2xl p-8 text-2xl text-gray-600 bg-gray-300 flex justify-center items-center gap-1">
           <input
             type="file"
             multiple

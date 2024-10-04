@@ -25,6 +25,7 @@ function App() {
           <Route path="/account/:subpage?" element={<Profile />} />
           <Route path="/account/places" element={<PlacesPage />}/>
           <Route path="/account/places/new" element={<PlacesFormPage />}/>
+          <Route path="/account/places/:id" element={<PlacesFormPage />}/>
           {/* This handles /places and /places/new */}
           {/* <Route path="*" element={<NotFound />}  /> */}
         </Route>
