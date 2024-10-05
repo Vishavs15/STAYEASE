@@ -29,6 +29,15 @@ app.use(
 
 mongoose.connect(process.env.MONGODB_CONNECT);
 
+app.use((req, res, next) => {
+  if (req.user) {
+    req.user.lastActive = new Date(); // Update the lastActive time to now
+    req.user.save() // Save the user document with updated lastActive
+      .catch(err => console.error("Error updating lastActive:", err));
+  }
+  next(); // Move on to the next middleware or route handler
+});
+
 app.get("/test", (req, res) => {
   res.json("Backend Start");
 });
@@ -55,15 +64,15 @@ app.post("/signin", async (req, res) => {
 app.post("/login", async (req, res) => {
   const { email, password } = req.body;
   const userDoc = await User.findOne({ email });
+
   if (userDoc) {
     const passOk = bcrypt.compareSync(password, userDoc.password);
     if (passOk) {
+      userDoc.lastActive = new Date(); // Update lastActive to current time
+      await userDoc.save(); // Save the updated user document
+
       jwt.sign(
-        {
-          email: userDoc.email,
-          id: userDoc._id,
-          name: userDoc.name,
-        },
+        { email: userDoc.email, id: userDoc._id, name: userDoc.name },
         jwtSecret,
         {},
         (err, token) => {
@@ -75,7 +84,7 @@ app.post("/login", async (req, res) => {
       res.status(422).json("Password is incorrect");
     }
   } else {
-    res.json("USer not found");
+    res.json("User not found");
   }
 });
 
@@ -102,7 +111,7 @@ app.get("/profile", (req, res) => {
 
 // ---------------------------------------------------------- PROFILE --------------------------------------------------------
 
-app.post("/upload-by-link", async (req, res) => { 
+app.post("/upload-by-link", async (req, res) => {
   const { link } = req.body;
   const newName = "photo" + Date.now() + ".jpg";
 
@@ -214,9 +223,47 @@ app.put("/places", async (req, res) => {
         maxGuests,
       });
       await placeDoc.save();
-      res.json('ok')
+      res.json("ok");
     }
   });
+});
+
+// ---------------------------------------------------------- USERS --------------------------------------------------------
+
+// app.get("/users", async (req, res) => {
+//   try {
+//     const users = await User.find(); // Fetch all users from the database
+//     res.json(users); // Send the users data as JSON
+//   } catch (error) {
+//     res.status(500).json({ error: "Failed to fetch users" });
+//   }
+// });
+
+app.get("/users", async (req, res) => {
+  const users = await User.find({});
+  
+  const currentTime = new Date();
+  const fiveMinutesAgo = new Date(currentTime.getTime() - 5 * 60 * 1000);
+  
+  const usersWithStatus = users.map((user) => ({
+    ...user.toObject(),
+    isOnline: user.lastActive > fiveMinutesAgo,
+  }));
+
+  res.json(usersWithStatus);
+});
+
+
+// ---------------------------------------------------------- DELETE USER --------------------------------------------------------
+
+app.delete("/users/:id", async (req, res) => {
+  try {
+    const { id } = req.params;
+    await User.findByIdAndDelete(id); // Delete user by ID
+    res.json({ message: "User deleted successfully" });
+  } catch (error) {
+    res.status(500).json({ error: "Failed to delete user" });
+  }
 });
 
 app.listen(3000, () => {

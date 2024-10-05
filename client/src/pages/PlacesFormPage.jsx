@@ -33,6 +33,7 @@ const PlacesFormPage = () => {
       setCheckIn(data.checkIn);
       setCheckOut(data.checkOut);
       setMaxGuest(data.maxGuest);
+      console.log(data.photos); // Check if photos are being fetched correctly
     });
   }, [id]);
 
