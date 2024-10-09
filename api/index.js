@@ -15,7 +15,7 @@ const Place = require("./models/Place");
 require("dotenv").config();
 
 const bcryptSalt = bcrypt.genSaltSync(12);
-const jwtSecret = "r93c8uKVU*&^gTVtb97t9";
+const jwtSecret = process.env.JWT_SECRET;
 
 app.use(express.json());
 app.use(cookieParser());
@@ -252,6 +252,34 @@ app.get("/users", async (req, res) => {
 
   res.json(usersWithStatus);
 });
+
+app.get("/user-details/:id", async (req, res) => {
+  const { id } = req.params;
+
+  try {
+    const user = await User.findById(id);
+    const places = await Place.find({ owner: id });
+
+    if (!user) {
+      return res.status(404).json({ error: "User not found" });
+    }
+
+    res.json({
+      user: {
+        name: user.name,
+        email: user.email,
+        createdAt: user.createdAt,
+        role: user.role || "User", // Include role if needed
+      },
+      places,
+    });
+  } catch (error) {
+    console.error("Error in /user-details/:id route:", error);
+    res.status(500).json({ error: "Failed to fetch user details", details: error.message });
+  }
+});
+
+
 
 
 // ---------------------------------------------------------- DELETE USER --------------------------------------------------------

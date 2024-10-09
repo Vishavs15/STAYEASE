@@ -46,6 +46,12 @@ const SignIn = () => {
               value={email}
               onChange={(ev) => setEmail(ev.target.value)}
             />
+            {/* <input
+              type="role"
+              placeholder="Host / Guest"
+              value={email}
+              onChange={(ev) => setEmail(ev.target.value)}
+            /> */}
             <input
               type="password"
               placeholder="Enter Password"

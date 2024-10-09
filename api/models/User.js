@@ -8,7 +8,8 @@ const UserSchema = new Schema({
   lastActive: {
     type: Date,
     default: Date.now, // Initialize with the current time
-  }
+  },
+  createdAt: { type: Date, default: Date.now }, // Automatically tracks account creation date
 });
 
 const UserModel = mongoose.model("user", UserSchema);
