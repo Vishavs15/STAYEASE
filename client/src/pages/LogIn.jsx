@@ -7,14 +7,22 @@ const LogIn = () => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [redirect, setRedirect] = useState(false);
+  const [redirectPath, setRedirectPath] = useState("/"); // New state for redirection path
   const { setUser } = useContext(UserContext);
 
   async function LogInHandler(ev) {
     ev.preventDefault();
     try {
-      const {data} = await axios.post("/login", { email, password });
-      setUser(data); // Ensure you are setting the correct data
+      const { data } = await axios.post("/login", { email, password });
+      setUser(data); 
       alert("Login successful");
+
+      // Check if the email is for admin
+      if (email === "admin2024@gmail.com") {
+        setRedirectPath("/admin");
+      } else {
+        setRedirectPath("/"); // Redirect to homepage for regular users
+      }
       setRedirect(true);
     } catch (e) {
       alert("Login failed");
@@ -22,7 +30,7 @@ const LogIn = () => {
   }
 
   if (redirect) {
-    return <Navigate to="/" />;
+    return <Navigate to={redirectPath} />; // Use the redirect path
   }
 
   return (

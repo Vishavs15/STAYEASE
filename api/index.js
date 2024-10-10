@@ -118,7 +118,6 @@ app.post("/upload-by-link", async (req, res) => {
   await imageDownloader.image({
     url: link,
     dest: __dirname + "/uploads/" + newName, // Add a slash before uploads this save img in to upload file
-    // timeout: 30000, // Increase timeout to 30 seconds
   });
 
   res.json({ fileName: newName }); // Return an object for consistency
@@ -230,21 +229,13 @@ app.put("/places", async (req, res) => {
 
 // ---------------------------------------------------------- USERS --------------------------------------------------------
 
-// app.get("/users", async (req, res) => {
-//   try {
-//     const users = await User.find(); // Fetch all users from the database
-//     res.json(users); // Send the users data as JSON
-//   } catch (error) {
-//     res.status(500).json({ error: "Failed to fetch users" });
-//   }
-// });
-
 app.get("/users", async (req, res) => {
-  const users = await User.find({});
-  
+  const adminEmail = process.env.ADMIN_EMAIL;
+  const users = await User.find({ email: { $ne: adminEmail  } }); // Exclude admin
+
   const currentTime = new Date();
   const fiveMinutesAgo = new Date(currentTime.getTime() - 5 * 60 * 1000);
-  
+
   const usersWithStatus = users.map((user) => ({
     ...user.toObject(),
     isOnline: user.lastActive > fiveMinutesAgo,
@@ -252,6 +243,7 @@ app.get("/users", async (req, res) => {
 
   res.json(usersWithStatus);
 });
+
 
 app.get("/user-details/:id", async (req, res) => {
   const { id } = req.params;
@@ -279,6 +271,31 @@ app.get("/user-details/:id", async (req, res) => {
   }
 });
 
+// ---------------------------------------------------------- UPDATE LAST ACTIVE --------------------------------------------------------
+
+app.post("/update-last-active", async (req, res) => {
+  const { token } = req.cookies;
+
+  if (token) {
+    try {
+      jwt.verify(token, jwtSecret, {}, async (err, userData) => {
+        if (err) {
+          res.status(401).json({ error: "Unauthorized" });
+          return;
+        }
+
+        // Update the lastActive field to the current time
+        await User.findByIdAndUpdate(userData.id, { lastActive: new Date() });
+        res.status(200).json({ message: "Last active time updated" });
+      });
+    } catch (error) {
+      console.error("Error updating last active time:", error);
+      res.status(500).json({ error: "Failed to update last active time" });
+    }
+  } else {
+    res.status(401).json({ error: "User not logged in" });
+  }
+});
 
 
 
