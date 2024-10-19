@@ -109,7 +109,7 @@ app.get("/profile", (req, res) => {
   }
 });
 
-// ---------------------------------------------------------- PROFILE --------------------------------------------------------
+// ---------------------------------------------------------- UPLOAD_BY_LINK --------------------------------------------------------
 
 app.post("/upload-by-link", async (req, res) => {
   const { link } = req.body;
@@ -123,7 +123,7 @@ app.post("/upload-by-link", async (req, res) => {
   res.json({ fileName: newName }); // Return an object for consistency
 });
 
-// ---------------------------------------------------------- PROFILE --------------------------------------------------------
+// ---------------------------------------------------------- UPLOADS --------------------------------------------------------
 
 const photosMiddleware = multer({ dest: "uploads/" });
 app.post("/upload", photosMiddleware.array("photos", 100), (req, res) => {
@@ -146,7 +146,7 @@ app.post("/places", (req, res) => {
   const {
     title,
     address,
-    addPhotos,
+    addedPhotos, // Change to 'addedPhotos' for consistency with the frontend
     description,
     perks,
     extraInfo,
@@ -160,7 +160,7 @@ app.post("/places", (req, res) => {
       owner: userData.id,
       title,
       address,
-      photos: addPhotos,
+      photos: addedPhotos, // Make sure this uses 'addedPhotos'
       description,
       perks,
       extraInfo,
@@ -196,7 +196,7 @@ app.put("/places", async (req, res) => {
     id,
     title,
     address,
-    addPhotos,
+    addedPhotos, // Change to 'addedPhotos' for consistency
     description,
     perks,
     extraInfo,
@@ -213,7 +213,7 @@ app.put("/places", async (req, res) => {
       placeDoc.set({
         title,
         address,
-        photos: addPhotos,
+        photos: addedPhotos, // Use 'addedPhotos' here as well
         description,
         perks,
         extraInfo,

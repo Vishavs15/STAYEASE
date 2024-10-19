@@ -67,6 +67,7 @@ const PlacesFormPage = () => {
       checkOut,
       maxGuest,
     };
+    // console.log("Place data being sent:", placeData); // Check the addedPhotos array
     if (id) {
       // update
       await axios.put("/places", {
