@@ -213,7 +213,7 @@ app.put("/places", async (req, res) => {
       placeDoc.set({
         title,
         address,
-        photos: addedPhotos, // Use 'addedPhotos' here as well
+        photos: addedPhotos, // Use 'addedPhotos' here as well 
         description,
         perks,
         extraInfo,
@@ -225,7 +225,7 @@ app.put("/places", async (req, res) => {
       res.json("ok");
     }
   });
-});
+}); 
 
 // ---------------------------------------------------------- USERS --------------------------------------------------------
 
