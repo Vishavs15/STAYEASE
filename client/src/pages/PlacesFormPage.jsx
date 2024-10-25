@@ -17,6 +17,7 @@ const PlacesFormPage = () => {
   const [checkIn, setCheckIn] = useState("");
   const [checkOut, setCheckOut] = useState("");
   const [maxGuest, setMaxGuest] = useState(1);
+  const [price, setPrice] = useState();
   const [redirect, setRedirect] = useState(false);
   useEffect(() => {
     if (!id) {
@@ -33,12 +34,13 @@ const PlacesFormPage = () => {
       setCheckIn(data.checkIn);
       setCheckOut(data.checkOut);
       setMaxGuest(data.maxGuest);
+      setPrice(data.price);
       console.log(data.photos); // Check if photos are being fetched correctly
     });
   }, [id]);
 
   function inputHeader(text) {
-    return <h2 className="text -2xl mt-4">{text}</h2>;
+    return <h2 className="text-2xl font-medium mt-4">{text}</h2>;
   }
 
   function inputDescription(text) {
@@ -66,6 +68,7 @@ const PlacesFormPage = () => {
       checkIn,
       checkOut,
       maxGuest,
+      price,
     };
     // console.log("Place data being sent:", placeData); // Check the addedPhotos array
     if (id) {
@@ -174,6 +177,21 @@ const PlacesFormPage = () => {
               />
             </div>
           </div>
+
+          {/* Pricing =================================================================================================================== */}
+
+          {preInput(
+            "Set a Price for your place",
+            "Try to set price which Good for both You and Guest"
+          )}
+            <div className="w-1/2">
+              <h3 className="mt-2 -mb-1">Price For One Night</h3>
+              <input
+                type="number"
+                value={price}
+                onChange={(ev) => setPrice(ev.target.value)}
+              />
+            </div>
 
           {/* Save Btn =================================================================================================================== */}
 
