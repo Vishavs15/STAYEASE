@@ -43,21 +43,29 @@ const PlacesPage = () => {
           </Link>
         </div>
       )}
-
       <div className="mt-7">
-        {places.length > 0 && places.map((place) => (
-            <Link to={'/account/places/'+place._id} className="flex cursor-pointer bg-gray-100 p-4 rounded-2xl gap-3 mb-2">
-              <div className="w-52 h-40 bg-gray-300 rounded-xl flex"> 
+        {places.length > 0 &&
+          places.map((place) => (
+            <Link
+              to={"/account/places/" + place._id}
+              className="flex cursor-pointer bg-gray-100 p-4 rounded-2xl gap-3 mb-2"
+            >
+              <div className="w-52 h-40 bg-gray-300 rounded-xl flex">
                 {place.photos.length > 0 && (
-                  <img src={'http://localhost:3000/uploads/'+place.photos[0]} alt="" className="rounded-xl"/>
+                  <img
+                    src={"http://localhost:3000/uploads/" + place.photos[0]}
+                    alt=""
+                    className="rounded-xl"
+                  />
                 )}
               </div>
 
-              <div className="">
+              <div className="flex flex-col w-full">
                 <h2 className="text-xl">{place.title}</h2>
-                <p className="text-sm mt-2">{place.description}</p>
+                <p className="text-sm mt-2 h-16 overflow-hidden text-ellipsis">
+                  {place.description}
+                </p>
               </div>
-              
             </Link>
           ))}
       </div>

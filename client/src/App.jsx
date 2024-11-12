@@ -9,6 +9,7 @@ import axios from "axios";
 import { UserContextProvider } from "./components/UserContext";
 import PlacesFormPage from "./pages/PlacesFormPage";
 import Dashboard from './admin/Dashboard';
+import PlacePage from './pages/PlacePage';
 
 // Set Axios defaults
 // axios.defaults.baseURL = "http://localhost3000"; this one has typo error
@@ -28,6 +29,7 @@ function App() {
           <Route path="/account/places/new" element={<PlacesFormPage />}/>
           <Route path="/account/places/:id" element={<PlacesFormPage />}/>
           <Route path="/admin" element={<Dashboard />}/>
+          <Route path="/place/:id" element={<PlacePage />}  />
           {/* This handles /places and /places/new */}
           {/* <Route path="*" element={<NotFound />}  /> */}
         </Route>

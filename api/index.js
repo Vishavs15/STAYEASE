@@ -2,7 +2,6 @@ const express = require("express");
 const app = express();
 const cors = require("cors");
 const { default: mongoose } = require("mongoose");
-const User = require("./models/User");
 require("dotenv").config();
 const bcrypt = require("bcrypt");
 const jwt = require("jsonwebtoken");
@@ -10,7 +9,9 @@ const cookieParser = require("cookie-parser");
 const imageDownloader = require("image-downloader");
 const multer = require("multer");
 const fs = require("fs");
+const User = require("./models/User");
 const Place = require("./models/Place");
+const { bookingModel } = require("./models/Booking"); // Adjust the path if needed
 
 require("dotenv").config();
 
@@ -155,6 +156,11 @@ app.post("/places", (req, res) => {
     maxGuests,
     price,
   } = req.body;
+
+  // Debugging: Check if maxGuests is received correctly
+  console.log("Request Body:", req.body);
+  console.log("Max Guests:", maxGuests);
+
   jwt.verify(token, jwtSecret, {}, async (err, userData) => {
     if (err) throw err;
     const placeDoc = await Place.create({
@@ -186,7 +192,7 @@ app.get("/user-places", (req, res) => {
 
 // ---------------------------------------------------------- PLACES/:ID --------------------------------------------------------
 
-app.get("/places/:id", async (req, res) => {
+app.get("/places/:id", async (req, res) => { // this give details about specific place
   const { id } = req.params;
   // res.json(req.params);
   res.json(await Place.findById(id));
@@ -317,6 +323,25 @@ app.delete("/users/:id", async (req, res) => {
   } catch (error) {
     res.status(500).json({ error: "Failed to delete user" });
   }
+});
+
+// ---------------------------------------------------------- --------------------------------------------------------
+
+app.post('/bookings', (req, res) => {
+  const {
+    place, checkIn: checkinDate, checkOut: checkoutDate, maxGuests, name, phone, price,
+  } = req.body;
+
+  bookingModel.create({
+    place, checkinDate, checkoutDate, maxGuests, name, phone, price,
+  })
+    .then((doc) => {
+      res.json(doc);
+    })
+    .catch((err) => {
+      console.error(err);
+      res.status(500).json({ error: 'Booking could not be created' });
+    });
 });
 
 app.listen(3000, () => {

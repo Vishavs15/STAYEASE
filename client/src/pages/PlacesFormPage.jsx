@@ -35,7 +35,7 @@ const PlacesFormPage = () => {
       setCheckOut(data.checkOut);
       setMaxGuest(data.maxGuest);
       setPrice(data.price);
-      console.log(data.photos); // Check if photos are being fetched correctly
+      // console.log(data.photos); // Check if photos are being fetched correctly
     });
   }, [id]);
 
@@ -94,7 +94,7 @@ const PlacesFormPage = () => {
         <form onSubmit={savePlace}>
           {/* Title =================================================================================================================== */}
 
-          {preInput("Title", "Title should be Short and Catchy")}
+          {preInput("Title", "Enter Short and Catchy Title")}
           <input
             type="text"
             value={title}
@@ -104,7 +104,7 @@ const PlacesFormPage = () => {
 
           {/* Address =================================================================================================================== */}
 
-          {preInput("Address", "Address should be exact")}
+          {preInput("Address", "Enter Address")}
           <input
             type="text"
             value={address}
@@ -137,7 +137,7 @@ const PlacesFormPage = () => {
 
           {/* Extra Info =================================================================================================================== */}
 
-          {preInput("Extra Info", "Address should be exact")}
+          {preInput("Extra Info", "Optional Informations")}
           <textarea
             value={extraInfo}
             onChange={(ev) => setExtraInfo(ev.target.value)}
@@ -146,10 +146,10 @@ const PlacesFormPage = () => {
           {/* Check In & Out =================================================================================================================== */}
 
           {preInput(
-            "Check In & Out Times, Max Guests",
+            "Check In & Out Times",
             "Add Check In & Out Times, Remember to have some time cleaning the room between Guests"
           )}
-          <div className="grid gap-2 sm:grid-cols-3">
+          <div className="grid gap-2 sm:grid-cols-3">    
             <div>
               <h3 className="mt-2 -mb-1">Check In Time</h3>
               <input
@@ -168,21 +168,21 @@ const PlacesFormPage = () => {
                 placeholder="07:00"
               />
             </div>
-            <div>
+            {/* <div>
               <h3 className="mt-2 -mb-1">Max Guests</h3>
               <input
                 type="number"
                 value={maxGuest}
                 onChange={(ev) => setMaxGuest(ev.target.value)}
               />
-            </div>
+            </div> */}
           </div>
 
           {/* Pricing =================================================================================================================== */}
 
           {preInput(
             "Set a Price for your place",
-            "Try to set price which Good for both You and Guest"
+            "Try to set price which is Good for both You and the Guest"
           )}
             <div className="w-1/2">
               <h3 className="mt-2 -mb-1">Price For One Night</h3>
