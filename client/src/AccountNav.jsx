@@ -8,15 +8,12 @@ const AccountNav = () => {
     subpage = 'profile';
   }
   function linkclassNames(type = null) {
-    const isActive = pathname === "/account" && type === "profile";
+    const isActive = subpage === type || (type === "profile" && pathname === "/account");
     let classNames = "inline-flex gap-1 py-2 px-6 rounded-full py-3 px-3 my-2";
-    if (type === subpage) {
-      classNames += " bg-primary text-white";
-    } else {
-      classNames += " border border-gray-300";
-    }
+    classNames += isActive ? " bg-primary text-white" : " border border-gray-300";
     return classNames;
   }
+  
 
   return (
     <nav className="w-full flex gap-4 justify-center text-center text-lg mt-12">
@@ -37,7 +34,7 @@ const AccountNav = () => {
         </svg>
         My Profile
       </Link>
-      <Link className={linkclassNames("bookings")} to={"/account/bookings"}>
+      <Link className={linkclassNames("bookings")} to="/account/booking">
         <svg
           xmlns="http://www.w3.org/2000/svg"
           fill="none"

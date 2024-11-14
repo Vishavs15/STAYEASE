@@ -11,7 +11,7 @@ const multer = require("multer");
 const fs = require("fs");
 const User = require("./models/User");
 const Place = require("./models/Place");
-const { bookingModel } = require("./models/Booking"); // Adjust the path if needed
+const Booking = require("./models/booking");
 
 require("dotenv").config();
 
@@ -29,6 +29,15 @@ app.use(
 );
 
 mongoose.connect(process.env.MONGODB_CONNECT);
+
+getUserDataFromToken = (req) => {
+  return new Promise((resolve, reject) => {
+    jwt.verify(req.cookies.token, jwtSecret, {}, async (err, userData) => {
+      if (err) throw err;
+      resolve(userData);
+    })
+  })
+}
 
 app.use((req, res, next) => {
   if (req.user) {
@@ -325,15 +334,17 @@ app.delete("/users/:id", async (req, res) => {
   }
 });
 
-// ---------------------------------------------------------- --------------------------------------------------------
+// ---------------------------------------------------------- BOOKINGS --------------------------------------------------------
 
-app.post('/bookings', (req, res) => {
+app.post('/bookings', async (req, res) => {
+  const userData = await getUserDataFromToken(req);
   const {
     place, checkIn: checkinDate, checkOut: checkoutDate, maxGuests, name, phone, price,
   } = req.body;
 
-  bookingModel.create({
+  Booking.create({     //// ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
     place, checkinDate, checkoutDate, maxGuests, name, phone, price,
+    user:userData.id,
   })
     .then((doc) => {
       res.json(doc);
@@ -344,6 +355,25 @@ app.post('/bookings', (req, res) => {
     });
 });
 
-app.listen(3000, () => {
-  console.log("Server running on port 3000");
+app.get('/bookings', async (req, res) => {
+  try {
+    const userData = await getUserDataFromToken(req);
+    const bookings = await Booking.find({ user: userData.id })
+      .populate('place')  // This requires 'Place' to be registered properly
+      .lean();
+
+    if (!bookings.length) {
+      return res.status(404).json({ message: "No bookings found" });
+    }
+
+    res.json(bookings);
+  } catch (error) {
+    console.error("Error fetching bookings:", error);
+    res.status(500).json({ error: "Error fetching bookings" });
+  }
 });
+
+
+app.listen(3000, () => {
+  console.log("Server running on port 3000"); 
+}); 

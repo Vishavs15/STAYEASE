@@ -2,7 +2,7 @@ import React, { useContext, useState } from "react";
 import { UserContext } from "../components/UserContext";
 import { Navigate, useParams } from "react-router-dom";
 import axios from "axios";
-import PlacesPage from "./PlacesPage";
+import PlacesPage from "./ListOfPlaces";
 import AccountNav from "../AccountNav";
 
 const Profile = () => {

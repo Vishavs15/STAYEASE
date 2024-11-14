@@ -13,10 +13,6 @@ const PlacesPage = () => {
     });
   }, []);
 
-  {
-    /* =================================================================================================================== */
-  }
-
   return (
     <div>
       {action !== "new" && (
@@ -47,6 +43,7 @@ const PlacesPage = () => {
         {places.length > 0 &&
           places.map((place) => (
             <Link
+              key={place._id} // Add a unique key prop here
               to={"/account/places/" + place._id}
               className="flex cursor-pointer bg-gray-100 p-4 rounded-2xl gap-3 mb-2"
             >

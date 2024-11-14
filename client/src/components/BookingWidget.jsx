@@ -1,7 +1,8 @@
-import React, { useState } from "react";
+import React, { useContext, useEffect, useState } from "react";
 import { differenceInCalendarDays } from "date-fns";
 import { Navigate } from "react-router-dom";
 import axios from "axios";
+import { UserContext } from "./UserContext";
 
 const BookingWidget = ({ place }) => {
   const [checkIn, setCheckIn] = useState("");
@@ -10,6 +11,18 @@ const BookingWidget = ({ place }) => {
   const [name, setName] = useState('');
   const [phone, setPhone] = useState(''); 
   const [redirect,setRedirect] = useState('');
+
+  // this help to auto fill user name in booikng widget
+  
+  const {user} = useContext(UserContext);
+
+  useEffect(() => {
+    if (user) {
+      setName(user.name);
+    }
+  }, [user]);
+
+  //====================================================
 
   async function bookthisPlace(){
     const response = await axios.post('/bookings', {checkIn,checkOut,maxGuest,name,phone,
