@@ -22,10 +22,10 @@ const Index = () => {
                 <img className="rounded-2xl object-cover aspect-square" src={"http://localhost:3000/uploads/" + place.photos[0]} alt=""/>
               )}
             </div>
-              <h2 className="text-sm truncate"> {place.title} </h2>
-              <h3 className="font-bold "> {place.address} </h3>
+              <h2 className="text-md font-semibold truncate mt-2"> {place.title} </h2>
+              <h3 className="text-gray-300"> {place.address} </h3>
               <div className="mt-2">
-                <span className="font-bold">{place.price}</span>INR per night
+                <span className="font-bold">₹{place.price}</span> night
               </div>
           </Link>
         ))}

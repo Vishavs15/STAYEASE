@@ -91,7 +91,7 @@ const BookingWidget = ({ place }) => {
               <label>Mobile Number: </label>
               <input
                 type="tel"
-                value={phone}
+                value={""}
                 onChange={(ev) => setPhone(ev.target.value)}
               />
             </div>

@@ -2,6 +2,7 @@ import { Link, useParams } from "react-router-dom";
 import PlacesFormPage from "./PlacesFormPage";
 import { useEffect, useState } from "react";
 import axios from "axios";
+import PlaceImg from "../components/PlaceImg";
 
 const PlacesPage = () => {
   const { action } = useParams();
@@ -48,13 +49,7 @@ const PlacesPage = () => {
               className="flex cursor-pointer bg-gray-100 p-4 rounded-2xl gap-3 mb-2"
             >
               <div className="w-52 h-40 bg-gray-300 rounded-xl flex">
-                {place.photos.length > 0 && (
-                  <img
-                    src={"http://localhost:3000/uploads/" + place.photos[0]}
-                    alt=""
-                    className="rounded-xl"
-                  />
-                )}
+                  <PlaceImg place={place} />
               </div>
 
               <div className="flex flex-col w-full">
