@@ -7,14 +7,54 @@ const Dashboard = () => {
   const [users, setUsers] = useState([]);
   const [isConfirmModalOpen, setConfirmModalOpen] = useState(false);
   const [userIdToDelete, setUserIdToDelete] = useState(null);
-  const [selectedUser, setSelectedUser] = useState(null); // State for selected user
-  const [isUserDetailsOpen, setUserDetailsOpen] = useState(false); // State for user details card
+  const [selectedUser, setSelectedUser] = useState(null);
+  const [isUserDetailsOpen, setUserDetailsOpen] = useState(false);
+  const [dashboardStats, setDashboardStats] = useState({
+    totalUsers: 0,
+    totalBookings: 0,
+    totalAccommodations: 0,
+  });
 
+  // Fetch users and dashboard statistics
   useEffect(() => {
-    axios.get("/users").then(({ data }) => {
-      setUsers(data);
-    });
+    const fetchDashboardData = async () => {
+      try {
+        const [usersResponse, statsResponse] = await Promise.all([
+          axios.get("/users"),
+          axios.get("/dashboard-stats"),
+        ]);
+  
+        console.log("Users:", usersResponse.data); // Debugging
+        console.log("Stats:", statsResponse.data); // Debugging
+  
+        setUsers(usersResponse.data);
+        setDashboardStats(statsResponse.data);
+  
+        // Debug the updated states
+        console.log("Updated Users State:", usersResponse.data);
+        console.log("Updated Dashboard Stats State:", statsResponse.data);
+      } catch (error) {
+        console.error("Error fetching dashboard data:", error.message);
+      }
+    };
+  
+    fetchDashboardData();
   }, []);
+  
+  // useEffect(() => {
+  //   setTimeout(() => {
+  //     setUsers([
+  //       { _id: "1", name: "John Doe", email: "john@example.com", isOnline: true },
+  //       { _id: "2", name: "Jane Smith", email: "jane@example.com", isOnline: false },
+  //     ]);
+  //     setDashboardStats({
+  //       totalUsers: 2,
+  //       totalBookings: 5,
+  //       totalAccommodations: 10,
+  //     });
+  //   }, 1000);
+  // }, []);
+  
 
   const handleDelete = (id) => {
     setUserIdToDelete(id);
@@ -39,23 +79,16 @@ const Dashboard = () => {
 
   const handleUserClick = async (user) => {
     try {
-      const { data } = await axios.get(`/user-details/${user._id}`); // Fetch user details
-  
-      // Ensure the data is in the expected format
-      if (!data || !data.user) {
-        console.error("No user data received from the API");
-        return;
+      const { data } = await axios.get(`/user-details/${user._id}`);
+      if (data?.user) {
+        setSelectedUser({ ...data.user, places: data.places || [] });
+        setUserDetailsOpen(true);
       }
-  
-      setSelectedUser(data.user); // Set the user details
-      setSelectedUser((prev) => ({ ...prev, places: data.places || [] })); // Add places to the user data
-      setUserDetailsOpen(true);
     } catch (error) {
       console.error("Error fetching user details:", error);
     }
   };
 
-  // Define handleCloseDetails to close the user details card
   const handleCloseDetails = () => {
     setUserDetailsOpen(false);
     setSelectedUser(null);
@@ -63,8 +96,26 @@ const Dashboard = () => {
 
   return (
     <div className="p-8 text-center">
-      <h1 className="text-2xl font-bold mb-4">User Dashboard</h1>
+      <h1 className="text-2xl font-bold mb-6">Admin Dashboard</h1>
 
+      {/* Dashboard Statistics */}
+      <div className="grid grid-cols-3 gap-4 mb-8">
+        {[
+          { title: "Total Users", value: dashboardStats.totalUsers, color: "blue" },
+          { title: "Total Bookings", value: dashboardStats.totalBookings, color: "green" },
+          { title: "Total Accommodations", value: dashboardStats.totalAccommodations, color: "purple" },
+        ].map((stat, idx) => (
+          <div
+            key={idx}
+            className={`p-4 bg-${stat.color}-500 text-white rounded-lg shadow-md`}
+          >
+            <h2 className="text-lg font-bold">{stat.title}</h2>
+            <p className="text-2xl">{stat.value}</p>
+          </div>
+        ))}
+      </div>
+
+      {/* Users Table */}
       <table className="min-w-full bg-white shadow-md rounded-lg overflow-hidden">
         <thead className="bg-gray-500 text-white">
           <tr>
@@ -79,12 +130,19 @@ const Dashboard = () => {
           {users.map((user, index) => (
             <tr key={user._id}>
               <td className="border p-2">{index + 1}</td>
-              <td className="border p-2 cursor-pointer" onClick={() => handleUserClick(user)}>
+              <td
+                className="border p-2 cursor-pointer"
+                onClick={() => handleUserClick(user)}
+              >
                 {user.name}
               </td>
               <td className="border p-2">{user.email}</td>
               <td className="border p-2">
-                <span className={`px-2 py-1 rounded ${user.isOnline ? "text-green-500" : "text-red-500"}`}>
+                <span
+                  className={`px-2 py-1 rounded ${
+                    user.isOnline ? "text-green-500" : "text-red-500"
+                  }`}
+                >
                   {user.isOnline ? "Online" : "Offline"}
                 </span>
               </td>
@@ -101,6 +159,7 @@ const Dashboard = () => {
         </tbody>
       </table>
 
+      {/* Modals */}
       {isConfirmModalOpen && (
         <ConfirmModal
           isOpen={isConfirmModalOpen}
@@ -108,7 +167,6 @@ const Dashboard = () => {
           onConfirm={handleConfirmDelete}
         />
       )}
-
       {isUserDetailsOpen && selectedUser && (
         <UserProfileCard userData={selectedUser} onClose={handleCloseDetails} />
       )}

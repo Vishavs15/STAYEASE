@@ -6,13 +6,25 @@ import PlaceImg from "../components/PlaceImg";
 
 const PlacesPage = () => {
   const { action } = useParams();
-
   const [places, setPlaces] = useState([]);
+
   useEffect(() => {
     axios.get("/user-places").then(({ data }) => {
       setPlaces(data);
     });
   }, []);
+
+  // Delete function to remove a place
+  const handleDelete = (id) => {
+    axios
+      .delete(`/user-places/${id}`)
+      .then(() => {
+        setPlaces(places.filter((place) => place._id !== id));
+      })
+      .catch((err) => {
+        console.error("Failed to delete place", err);
+      });
+  };
 
   return (
     <div>
@@ -43,13 +55,12 @@ const PlacesPage = () => {
       <div className="mt-7">
         {places.length > 0 &&
           places.map((place) => (
-            <Link
+            <div
               key={place._id} // Add a unique key prop here
-              to={"/account/places/" + place._id}
               className="flex cursor-pointer bg-gray-100 p-4 rounded-2xl gap-3 mb-2"
             >
               <div className="w-52 h-40 bg-gray-300 rounded-xl flex">
-                  <PlaceImg place={place} />
+                <PlaceImg place={place} />
               </div>
 
               <div className="flex flex-col w-full">
@@ -58,7 +69,15 @@ const PlacesPage = () => {
                   {place.description}
                 </p>
               </div>
-            </Link>
+
+              {/* Delete Button */}
+              <button
+                className="bg-red-500 text-white rounded-full py-1 px-3 mt-2 h-10"
+                onClick={() => handleDelete(place._id)}
+              >
+                Delete
+              </button>
+            </div>
           ))}
       </div>
 

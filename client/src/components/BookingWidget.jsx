@@ -10,11 +10,11 @@ const BookingWidget = ({ place }) => {
   const [maxGuest, setMaxGuest] = useState(1);
   const [name, setName] = useState('');
   const [phone, setPhone] = useState(''); 
-  const [redirect,setRedirect] = useState('');
+  const [redirect, setRedirect] = useState('');
+  const [errorMessage, setErrorMessage] = useState('');
 
-  // this help to auto fill user name in booikng widget
-  
-  const {user} = useContext(UserContext);
+  // this helps to auto-fill user name in booking widget
+  const { user } = useContext(UserContext);
 
   useEffect(() => {
     if (user) {
@@ -24,20 +24,45 @@ const BookingWidget = ({ place }) => {
 
   //====================================================
 
-  async function bookthisPlace(){
-    const response = await axios.post('/bookings', {checkIn,checkOut,maxGuest,name,phone,
-      place:place._id,
-      price : numberofDays*place.price,
+  const validateForm = () => {
+    // Full Name validation: only letters and spaces, minimum length of 3 characters
+    const namePattern = /^[A-Za-z\s]{3,}$/;
+    if (!namePattern.test(name)) {
+      setErrorMessage("Please enter a valid name (at least 3 characters, no special characters).");
+      return false;
+    }
+
+    // Mobile Number validation: exactly 10 digits, numeric only
+    const phonePattern = /^[0-9]{10}$/;
+    if (!phonePattern.test(phone)) {
+      setErrorMessage("Please enter a valid 10-digit mobile number.");
+      return false;
+    }
+
+    setErrorMessage(""); // Clear any previous error messages
+    return true;
+  };
+
+  async function bookthisPlace() {
+    if (!validateForm()) return; // Don't proceed if the form is not valid
+
+    const response = await axios.post('/bookings', { 
+      checkIn, 
+      checkOut, 
+      maxGuest, 
+      name, 
+      phone,
+      place: place._id,
+      price: numberofDays * place.price,
     });
     const bookingID = response.data._id;
     setRedirect(`/account/bookings/${bookingID}`);
-
-    
   }
 
   if (redirect) {
-    return <Navigate to ={redirect} />
+    return <Navigate to={redirect} />;
   }
+
   let numberofDays = 0;
   if (checkIn && checkOut) {
     numberofDays = differenceInCalendarDays(
@@ -45,6 +70,9 @@ const BookingWidget = ({ place }) => {
       new Date(checkIn)
     );
   }
+
+  // Get today's date in the format YYYY-MM-DD
+  const today = new Date().toISOString().split("T")[0];
 
   return (
     <div>
@@ -61,6 +89,7 @@ const BookingWidget = ({ place }) => {
                 type="date"
                 value={checkIn}
                 onChange={(ev) => setCheckIn(ev.target.value)}
+                min={today} // Ensure check-in date is today or later
               />
             </div>
             <div className="py-3 px-4 border-l">
@@ -69,6 +98,8 @@ const BookingWidget = ({ place }) => {
                 type="date"
                 value={checkOut}
                 onChange={(ev) => setCheckOut(ev.target.value)}
+                min={checkIn} // Ensure check-out date is after check-in date
+                disabled={!checkIn} // Disable check-out if no check-in date selected
               />
             </div>
           </div>
@@ -87,13 +118,22 @@ const BookingWidget = ({ place }) => {
                 type="text"
                 value={name}
                 onChange={(ev) => setName(ev.target.value)}
+                placeholder="Enter full name"
               />
+              {errorMessage && errorMessage.includes("name") && (
+                <p className="text-red-500 text-sm">{errorMessage}</p>
+              )}
+              
               <label>Mobile Number: </label>
               <input
                 type="tel"
-                value={""}
+                value={phone}
                 onChange={(ev) => setPhone(ev.target.value)}
+                placeholder="Enter mobile number"
               />
+              {errorMessage && errorMessage.includes("mobile") && (
+                <p className="text-red-500 text-sm">{errorMessage}</p>
+              )}
             </div>
           )}
         </div>

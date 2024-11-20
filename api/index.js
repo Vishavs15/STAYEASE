@@ -12,6 +12,8 @@ const fs = require("fs");
 const User = require("./models/User");
 const Place = require("./models/Place");
 const Booking = require("./models/booking");
+const PlaceModel = require("./models/Place");
+const router = express.Router();
 
 require("dotenv").config();
 
@@ -39,18 +41,97 @@ getUserDataFromToken = (req) => {
   })
 }
 
-app.use((req, res, next) => {
-  if (req.user) {
-    req.user.lastActive = new Date(); // Update the lastActive time to now
-    req.user.save() // Save the user document with updated lastActive
-      .catch(err => console.error("Error updating lastActive:", err));
+// app.use((req, res, next) => {
+//   if (req.user) {
+//     req.user.lastActive = new Date(); // Update the lastActive time to now
+//     req.user.save() // Save the user document with updated lastActive
+//       .catch(err => console.error("Error updating lastActive:", err));
+//   }
+//   next(); // Move on to the next middleware or route handler
+// });
+
+// app.get("/test", (req, res) => {
+//   res.json("Backend Start");
+// });
+
+app.use(async (req, res, next) => {
+  const { token } = req.cookies;
+
+  if (token) {
+    try {
+      const userData = await new Promise((resolve, reject) => {
+        jwt.verify(token, jwtSecret, {}, (err, decodedData) => {
+          if (err) reject(err);
+          resolve(decodedData);
+        });
+      });
+
+      // Update lastActive for the user
+      await User.findByIdAndUpdate(userData.id, { lastActive: new Date() });
+    } catch (error) {
+      console.error("Error updating last active time:", error);
+    }
   }
-  next(); // Move on to the next middleware or route handler
+  next(); // Proceed to the next middleware or route handler
 });
 
+app.use(express.json());
+app.use(cookieParser());
+app.use("/uploads", express.static(__dirname + "/uploads"));
+app.use(
+  cors({
+    credentials: true,
+    origin: "http://localhost:5173",
+  })
+);
+
+// Middleware to update last active time
+app.use(async (req, res, next) => {
+  const { token } = req.cookies;
+
+  if (token) {
+    try {
+      const userData = await new Promise((resolve, reject) => {
+        jwt.verify(token, jwtSecret, {}, (err, decodedData) => {
+          if (err) reject(err);
+          resolve(decodedData);
+        });
+      });
+
+      // Update lastActive for the user
+      await User.findByIdAndUpdate(userData.id, { lastActive: new Date() });
+    } catch (error) {
+      console.error("Error updating last active time:", error);
+    }
+  }
+  next(); // Proceed to the next middleware or route handler
+});
+
+// Routes start here
 app.get("/test", (req, res) => {
   res.json("Backend Start");
 });
+
+// Add all other routes below
+
+app.get("/dashboard-stats", async (req, res) => {
+  try {
+    const totalUsers = await User.countDocuments({});
+    const totalBookings = await Booking.countDocuments({});
+    const totalAccommodations = await Place.countDocuments({});
+    
+    res.json({
+      totalUsers,
+      totalBookings,
+      totalAccommodations,
+    });
+  } catch (error) {
+    console.error("Error fetching stats:", error);
+    res.status(500).json({ error: "Internal Server Error" });
+  }
+});
+
+module.exports = router;
 
 // ---------------------------------------------------------- SIGNIN --------------------------------------------------------
 
@@ -106,17 +187,49 @@ app.post("/logout", (req, res) => {
 
 // ---------------------------------------------------------- PROFILE --------------------------------------------------------
 
+// app.get("/profile", (req, res) => {
+//   const { token } = req.cookies;
+//   if (token) {
+//     jwt.verify(token, jwtSecret, {}, async (err, userData) => {
+//       if (err) {
+//         return res.status(401).json({ error: "Invalid token" });
+//       }      
+//       const { name, email, _id } = await User.findById(userData.id);
+//       res.json({ name, email, _id });
+//     });
+//   } else {
+//     res.json(null);
+//   }
+// });
+
 app.get("/profile", (req, res) => {
   const { token } = req.cookies;
-  if (token) {
-    jwt.verify(token, jwtSecret, {}, async (err, userData) => {
-      if (err) throw err;
-      const { name, email, _id } = await User.findById(userData.id);
-      res.json({ name, email, _id });
-    });
-  } else {
-    res.json(null);
+
+  if (!token) {
+    return res.json(null); // No token case
   }
+
+  jwt.verify(token, jwtSecret, {}, async (err, userData) => {
+    if (err) {
+      return res.status(401).json({ error: "Invalid token" });
+    }
+
+    if (!userData?.id) {
+      return res.status(400).json({ error: "Invalid user data" });
+    }
+
+    try {
+      const { name, email, _id } = await User.findById(userData.id);
+
+      if (!name || !email || !_id) {
+        return res.status(404).json({ error: "User not found" });
+      }
+
+      res.json({ name, email, _id });
+    } catch (error) {
+      res.status(500).json({ error: "Database query failed" });
+    }
+  });
 });
 
 // ---------------------------------------------------------- UPLOAD_BY_LINK --------------------------------------------------------
@@ -198,6 +311,15 @@ app.get("/user-places", (req, res) => {
     res.json(await Place.find({ owner: id }));
   });
 });
+
+app.delete('/user-places/:id', (req, res) => {
+  const { id } = req.params;
+  // Logic to delete the place from the database using the id
+  Place.findByIdAndDelete(id)
+    .then(() => res.status(200).json({ message: 'Place deleted successfully' }))
+    .catch(err => res.status(500).json({ message: 'Failed to delete place', error: err }));
+});
+
 
 // ---------------------------------------------------------- PLACES/:ID --------------------------------------------------------
 
@@ -355,18 +477,43 @@ app.post('/bookings', async (req, res) => {
     });
 });
 
+// app.get('/bookings', async (req, res) => {
+//   try {
+//     const userData = await getUserDataFromToken(req);
+//     const bookings = await Booking.find({ user: userData.id })
+//       .populate('place')  // This requires 'Place' to be registered properly
+//       .lean();
+
+//     if (!bookings.length) {
+//       return res.status(404).json({ message: "No bookings found" });
+//     }
+
+//     res.json(bookings);
+//   } catch (error) {
+//     console.error("Error fetching bookings:", error);
+//     res.status(500).json({ error: "Error fetching bookings" });
+//   }
+// });
+
 app.get('/bookings', async (req, res) => {
   try {
     const userData = await getUserDataFromToken(req);
+
     const bookings = await Booking.find({ user: userData.id })
-      .populate('place')  // This requires 'Place' to be registered properly
-      .lean();
+      .populate('place')  // Populate place details (which should include guests)
+      .lean();  // Convert to plain JavaScript objects
 
     if (!bookings.length) {
       return res.status(404).json({ message: "No bookings found" });
     }
 
-    res.json(bookings);
+    // Add number of guests to each booking
+    const bookingsWithGuests = bookings.map(booking => ({
+      ...booking,
+      guests: booking.place.guests,  // Add guests information from the place
+    }));
+
+    res.json(bookingsWithGuests);
   } catch (error) {
     console.error("Error fetching bookings:", error);
     res.status(500).json({ error: "Error fetching bookings" });
@@ -374,6 +521,45 @@ app.get('/bookings', async (req, res) => {
 });
 
 
+
+app.delete("/bookings/:id", async (req, res) => {
+  try {
+    const { id } = req.params;
+    await Booking.findByIdAndDelete(id); // Assuming you're using Mongoose
+    res.status(200).send({ message: "Booking deleted successfully" });
+  } catch (error) {
+    res.status(500).send({ message: "Error deleting booking", error });
+  }
+});
+
+// app.get('/bookings', async (req, res) => {
+//   try {
+//     const bookings = await Booking.find()
+//       .populate('user', 'name mobile') // Populate the username and mobile fields
+//       .exec();
+//     res.json(bookings);
+//   } catch (error) {
+//     console.error("Error fetching bookings:", error);
+//     res.status(500).send('Server Error');
+//   }
+// });
+
 app.listen(3000, () => {
   console.log("Server running on port 3000"); 
 }); 
+
+app.get('/bookings', async (req, res) => {
+  const { userId } = req.query;
+  try {
+    const filter = userId ? { user: userId } : {}; // Filter by user ID if provided
+    const bookings = await Booking.find(filter).populate('place');
+    res.json(bookings);
+  } catch (error) {
+    res.status(500).json({ message: 'Error fetching bookings', error });
+  }
+});
+
+
+// ---------------------------------------------------------- DASHBOARD STATUS --------------------------------------------------------
+
+
