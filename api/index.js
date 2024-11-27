@@ -14,6 +14,11 @@ const Place = require("./models/Place");
 const Booking = require("./models/booking");
 const PlaceModel = require("./models/Place");
 const router = express.Router();
+const Stripe = require("stripe");
+const stripe = new Stripe(process.env.SECRET_KEY);
+// const paymentRoutes = require('./payments');
+// app.use('/api/payments', paymentRoutes);
+
 
 require("dotenv").config();
 
@@ -40,19 +45,6 @@ getUserDataFromToken = (req) => {
     })
   })
 }
-
-// app.use((req, res, next) => {
-//   if (req.user) {
-//     req.user.lastActive = new Date(); // Update the lastActive time to now
-//     req.user.save() // Save the user document with updated lastActive
-//       .catch(err => console.error("Error updating lastActive:", err));
-//   }
-//   next(); // Move on to the next middleware or route handler
-// });
-
-// app.get("/test", (req, res) => {
-//   res.json("Backend Start");
-// });
 
 app.use(async (req, res, next) => {
   const { token } = req.cookies;
@@ -187,21 +179,6 @@ app.post("/logout", (req, res) => {
 
 // ---------------------------------------------------------- PROFILE --------------------------------------------------------
 
-// app.get("/profile", (req, res) => {
-//   const { token } = req.cookies;
-//   if (token) {
-//     jwt.verify(token, jwtSecret, {}, async (err, userData) => {
-//       if (err) {
-//         return res.status(401).json({ error: "Invalid token" });
-//       }      
-//       const { name, email, _id } = await User.findById(userData.id);
-//       res.json({ name, email, _id });
-//     });
-//   } else {
-//     res.json(null);
-//   }
-// });
-
 app.get("/profile", (req, res) => {
   const { token } = req.cookies;
 
@@ -319,7 +296,6 @@ app.delete('/user-places/:id', (req, res) => {
     .then(() => res.status(200).json({ message: 'Place deleted successfully' }))
     .catch(err => res.status(500).json({ message: 'Failed to delete place', error: err }));
 });
-
 
 // ---------------------------------------------------------- PLACES/:ID --------------------------------------------------------
 
@@ -442,8 +418,6 @@ app.post("/update-last-active", async (req, res) => {
   }
 });
 
-
-
 // ---------------------------------------------------------- DELETE USER --------------------------------------------------------
 
 app.delete("/users/:id", async (req, res) => {
@@ -464,7 +438,7 @@ app.post('/bookings', async (req, res) => {
     place, checkIn: checkinDate, checkOut: checkoutDate, maxGuests, name, phone, price,
   } = req.body;
 
-  Booking.create({     //// ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+  Booking.create({   
     place, checkinDate, checkoutDate, maxGuests, name, phone, price,
     user:userData.id,
   })
@@ -476,24 +450,6 @@ app.post('/bookings', async (req, res) => {
       res.status(500).json({ error: 'Booking could not be created' });
     });
 });
-
-// app.get('/bookings', async (req, res) => {
-//   try {
-//     const userData = await getUserDataFromToken(req);
-//     const bookings = await Booking.find({ user: userData.id })
-//       .populate('place')  // This requires 'Place' to be registered properly
-//       .lean();
-
-//     if (!bookings.length) {
-//       return res.status(404).json({ message: "No bookings found" });
-//     }
-
-//     res.json(bookings);
-//   } catch (error) {
-//     console.error("Error fetching bookings:", error);
-//     res.status(500).json({ error: "Error fetching bookings" });
-//   }
-// });
 
 app.get('/bookings', async (req, res) => {
   try {
@@ -520,6 +476,17 @@ app.get('/bookings', async (req, res) => {
   }
 });
 
+app.get('/bookings/:id', async (req, res) => {
+  try {
+    const booking = await Booking.findById(req.params.id).populate('place');
+    if (!booking) {
+      return res.status(404).json({ message: 'Booking not found' });
+    }
+    res.json(booking);
+  } catch (error) {
+    res.status(500).json({ message: 'Error fetching booking', error });
+  }
+});
 
 
 app.delete("/bookings/:id", async (req, res) => {
@@ -531,22 +498,6 @@ app.delete("/bookings/:id", async (req, res) => {
     res.status(500).send({ message: "Error deleting booking", error });
   }
 });
-
-// app.get('/bookings', async (req, res) => {
-//   try {
-//     const bookings = await Booking.find()
-//       .populate('user', 'name mobile') // Populate the username and mobile fields
-//       .exec();
-//     res.json(bookings);
-//   } catch (error) {
-//     console.error("Error fetching bookings:", error);
-//     res.status(500).send('Server Error');
-//   }
-// });
-
-app.listen(3000, () => {
-  console.log("Server running on port 3000"); 
-}); 
 
 app.get('/bookings', async (req, res) => {
   const { userId } = req.query;
@@ -560,6 +511,39 @@ app.get('/bookings', async (req, res) => {
 });
 
 
-// ---------------------------------------------------------- DASHBOARD STATUS --------------------------------------------------------
 
+// Endpoint to create a Payment Intent
+app.post('/create-payment-intent', async (req, res) => {
+  const { amount, currency } = req.body;
 
+  try {
+      const paymentIntent = await stripe.paymentIntents.create({
+          amount,
+          currency,
+      });
+      res.json({ clientSecret: paymentIntent.client_secret });
+  } catch (error) {
+      console.error('Error creating payment intent:', error);
+      res.status(500).json({ error: 'Internal Server Error' });
+  }
+});
+
+app.post('/api/payments/create-payment-intent', async (req, res) => {
+  const { amount, currency } = req.body;
+
+  try {
+      const paymentIntent = await stripe.paymentIntents.create({
+          amount, // Amount should be in the smallest currency unit (e.g., paise for INR)
+          currency,
+      });
+
+      res.json({ clientSecret: paymentIntent.client_secret });
+  } catch (error) {
+      console.error('Error creating payment intent:', error);
+      res.status(500).json({ error: 'Failed to create payment intent' });
+  }
+});
+
+app.listen(3000, () => {
+  console.log("Server running on port 3000"); 
+}); 

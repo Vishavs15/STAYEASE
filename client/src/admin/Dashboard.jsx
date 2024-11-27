@@ -101,9 +101,9 @@ const Dashboard = () => {
       {/* Dashboard Statistics */}
       <div className="grid grid-cols-3 gap-4 mb-8">
         {[
-          { title: "Total Users", value: dashboardStats.totalUsers, color: "blue" },
-          { title: "Total Bookings", value: dashboardStats.totalBookings, color: "green" },
-          { title: "Total Accommodations", value: dashboardStats.totalAccommodations, color: "purple" },
+          { title: "Total Users", value: dashboardStats.totalUsers-1, color: "blue" },
+          { title: "Total Bookings", value: dashboardStats.totalBookings, color: "blue" },
+          { title: "Total Accommodations", value: dashboardStats.totalAccommodations, color: "blue" },
         ].map((stat, idx) => (
           <div
             key={idx}
