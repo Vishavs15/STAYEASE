@@ -14,11 +14,6 @@ const Place = require("./models/Place");
 const Booking = require("./models/booking");
 const PlaceModel = require("./models/Place");
 const router = express.Router();
-const Stripe = require("stripe");
-const stripe = new Stripe(process.env.SECRET_KEY);
-// const paymentRoutes = require('./payments');
-// app.use('/api/payments', paymentRoutes);
-
 
 require("dotenv").config();
 
@@ -28,12 +23,10 @@ const jwtSecret = process.env.JWT_SECRET;
 app.use(express.json());
 app.use(cookieParser());
 app.use("/uploads", express.static(__dirname + "/uploads"));
-app.use(
-  cors({
-    credentials: true,
-    origin: "http://localhost:5173",
-  })
-);
+app.use(cors({
+  origin: 'http://localhost:5173',  // Allow requests from the frontend
+  credentials: true,  // Allow cookies/credentials
+}));
 
 mongoose.connect(process.env.MONGODB_CONNECT);
 
@@ -507,40 +500,6 @@ app.get('/bookings', async (req, res) => {
     res.json(bookings);
   } catch (error) {
     res.status(500).json({ message: 'Error fetching bookings', error });
-  }
-});
-
-
-
-// Endpoint to create a Payment Intent
-app.post('/create-payment-intent', async (req, res) => {
-  const { amount, currency } = req.body;
-
-  try {
-      const paymentIntent = await stripe.paymentIntents.create({
-          amount,
-          currency,
-      });
-      res.json({ clientSecret: paymentIntent.client_secret });
-  } catch (error) {
-      console.error('Error creating payment intent:', error);
-      res.status(500).json({ error: 'Internal Server Error' });
-  }
-});
-
-app.post('/api/payments/create-payment-intent', async (req, res) => {
-  const { amount, currency } = req.body;
-
-  try {
-      const paymentIntent = await stripe.paymentIntents.create({
-          amount, // Amount should be in the smallest currency unit (e.g., paise for INR)
-          currency,
-      });
-
-      res.json({ clientSecret: paymentIntent.client_secret });
-  } catch (error) {
-      console.error('Error creating payment intent:', error);
-      res.status(500).json({ error: 'Failed to create payment intent' });
   }
 });
 
