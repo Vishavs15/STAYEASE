@@ -34,7 +34,7 @@ const PlacePage = () => {
                 viewBox="0 0 24 24"
                 stroke-width="1.5"
                 stroke="currentColor"
-                class="size-6"
+                className="size-6"
               >
                 <path
                   stroke-linecap="round"
@@ -110,11 +110,52 @@ const PlacePage = () => {
         <div>
           Check-in: {place.checkIn} <br />
           Check-out: {place.checkOut} <br />
-          {/* Max number of guests: {place.maxGuests} */}
-          {/* <div className="mt-2 text-sm text-gray-700 leading-4">
+          Max number of guests: {place.maxGuests}
+          <div className="mt-2 text-sm text-gray-700 leading-4">
             <h2 className="font-semibold text-2xl mb-2">Important Notice</h2>
             {place.extraInfo}
+          </div>
+          {/* <div className="mt-4">
+            <h2 className="font-semibold text-2xl mb-2">Perks</h2>
+            <ul className="list-disc pl-6">
+              {place.perks && place.perks.length > 0 ? (
+                place.perks.map((perk, index) => (
+                  <li key={index} className="text-sm text-gray-700 leading-4">
+                    {perk}
+                  </li>
+                ))
+              ) : (
+                <p className="text-sm text-gray-500">No perks available.</p>
+              )}
+            </ul>
           </div> */}
+          <div className="mt-4 mx-4">
+            <h2 className="font-semibold text-2xl mb-4">Perks</h2>
+            <ul className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+              {place.perks && place.perks.length > 0 ? (
+                place.perks.map((perk, index) => (
+                  <li
+                    key={index}
+                    className="flex items-center justify-between bg-gray-200 p-4 rounded-xl shadow-lg hover:scale-105 transition-all duration-300 ease-in-out"
+                  >
+                    <div className="flex items-center space-x-3">
+                      <div className="w-2 h-2 bg-green-500 rounded-full"></div>{" "}
+                      {/* Small color dot */}
+                      <span className="font-medium text-lg text-gray-800">
+                        {perk}
+                      </span>
+                    </div>
+                    {/* <span className="text-sm text-gray-600">✔️</span>{" "} */}
+                    {/* A check mark or small symbol */}
+                  </li>
+                ))
+              ) : (
+                <p className="text-gray-600">
+                  No perks available for this place.
+                </p>
+              )}
+            </ul>
+          </div>
         </div>
         <div>
           <BookingWidget place={place} />
@@ -125,4 +166,3 @@ const PlacePage = () => {
 };
 
 export default PlacePage;
-
