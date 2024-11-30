@@ -10,19 +10,21 @@ const BookingWidget = ({ place }) => {
   const [maxGuest, setMaxGuest] = useState(1);
   const [name, setName] = useState('');
   const [phone, setPhone] = useState(''); 
+  const [email, setEmail] = useState(''); 
   const [redirect, setRedirect] = useState('');
   const [errorMessage, setErrorMessage] = useState('');
+  const [loginMessage, setLoginMessage] = useState('');
 
-  // this helps to auto-fill user name in booking widget
+  // this helps to auto-fill user name and email in booking widget
   const { user } = useContext(UserContext);
 
   useEffect(() => {
     if (user) {
       setName(user.name);
+      setEmail(user.email); // Autofill the email if the user is logged in
+      setPhone(user.phone);
     }
   }, [user]);
-
-  //====================================================
 
   const validateForm = () => {
     // Full Name validation: only letters and spaces, minimum length of 3 characters
@@ -39,11 +41,25 @@ const BookingWidget = ({ place }) => {
       return false;
     }
 
+    const emailPattern = /^[^@]+@[^@]+\.[^@]+$/; // Simplified email validation
+    if (!emailPattern.test(email)) {
+      setErrorMessage("Please enter a valid Email.");
+      return false;
+    }
+
     setErrorMessage(""); // Clear any previous error messages
     return true;
   };
 
   async function bookthisPlace() {
+    if (!user) {
+      setLoginMessage("Please log in first.");
+      setTimeout(() => {
+        setRedirect("/login");
+      }, 2000); // Redirect to login page after 2 seconds
+      return;
+    }
+
     if (!validateForm()) return; // Don't proceed if the form is not valid
 
     const response = await axios.post('/bookings', { 
@@ -123,7 +139,19 @@ const BookingWidget = ({ place }) => {
               {errorMessage && errorMessage.includes("name") && (
                 <p className="text-red-500 text-sm">{errorMessage}</p>
               )}
-              
+
+              <label>Email : </label>
+              <input
+                type="email"
+                value={email}
+                onChange={(ev) => setEmail(ev.target.value)}
+                placeholder="Enter Your Email"
+                disabled // Make email field non-editable
+              />
+              {errorMessage && errorMessage.includes("email") && (
+                <p className="text-red-500 text-sm">{errorMessage}</p>
+              )}
+
               <label>Mobile Number: </label>
               <input
                 type="tel"
@@ -141,6 +169,10 @@ const BookingWidget = ({ place }) => {
         <button onClick={bookthisPlace} className="primary mt-4 w-full">
           Book Now {numberofDays > 0 && <span>₹ {numberofDays * place.price}</span>}
         </button>
+
+        {loginMessage && (
+          <p className="text-red-500 text-center mt-4">{loginMessage}</p>
+        )}
       </div>
     </div>
   );

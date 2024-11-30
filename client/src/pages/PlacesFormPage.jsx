@@ -16,7 +16,7 @@ const PlacesFormPage = () => {
   const [extraInfo, setExtraInfo] = useState("");
   const [checkIn, setCheckIn] = useState("");
   const [checkOut, setCheckOut] = useState("");
-  const [maxGuest, setMaxGuest] = useState(1);
+  const [maxGuests, setMaxGuests] = useState(); // Change to maxGuests
   const [price, setPrice] = useState();
   const [redirect, setRedirect] = useState(false);
   useEffect(() => {
@@ -33,7 +33,7 @@ const PlacesFormPage = () => {
       setExtraInfo(data.extraInfo);
       setCheckIn(data.checkIn);
       setCheckOut(data.checkOut);
-      setMaxGuest(data.maxGuest);
+      setMaxGuests(data.maxGuests);
       setPrice(data.price);
       // console.log(data.photos); // Check if photos are being fetched correctly
     });
@@ -67,14 +67,15 @@ const PlacesFormPage = () => {
       extraInfo,
       checkIn,
       checkOut,
-      maxGuest,
+      maxGuests,
       price,
     };
     // console.log("Place data being sent:", placeData); // Check the addedPhotos array
     if (id) {
       // update
       await axios.put("/places", {
-        id, ...placeData,
+        id,
+        ...placeData,
       });
       setRedirect(true);
     } else {
@@ -149,7 +150,7 @@ const PlacesFormPage = () => {
             "Check In & Out Times",
             "Add Check In & Out Times, Remember to have some time cleaning the room between Guests"
           )}
-          <div className="grid gap-2 sm:grid-cols-3">    
+          <div className="grid gap-2 sm:grid-cols-3">
             <div>
               <h3 className="mt-2 -mb-1">Check In Time</h3>
               <input
@@ -168,14 +169,14 @@ const PlacesFormPage = () => {
                 placeholder="07:00"
               />
             </div>
-            {/* <div>
+            <div>
               <h3 className="mt-2 -mb-1">Max Guests</h3>
               <input
                 type="number"
-                value={maxGuest}
-                onChange={(ev) => setMaxGuest(ev.target.value)}
+                value={maxGuests} // Change here
+                onChange={(ev) => setMaxGuests(ev.target.value)} // Change here
               />
-            </div> */}
+            </div>
           </div>
 
           {/* Pricing =================================================================================================================== */}
@@ -184,14 +185,14 @@ const PlacesFormPage = () => {
             "Set a Price for your place",
             "Try to set price which is Good for both You and the Guest"
           )}
-            <div className="w-1/2">
-              <h3 className="mt-2 -mb-1">Price For One Night</h3>
-              <input
-                type="number"
-                value={price}
-                onChange={(ev) => setPrice(ev.target.value)}
-              />
-            </div>
+          <div className="w-1/2">
+            <h3 className="mt-2 -mb-1">Price For One Night</h3>
+            <input
+              type="number"
+              value={price}
+              onChange={(ev) => setPrice(ev.target.value)}
+            />
+          </div>
 
           {/* Save Btn =================================================================================================================== */}
 

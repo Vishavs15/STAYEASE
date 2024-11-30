@@ -17,7 +17,7 @@ const AccountNav = () => {
 
   return (
     <nav className="w-full flex gap-4 justify-center text-center text-lg mt-12">
-      <Link className={linkclassNames("profile")} to={"/account"}>
+      {/* <Link className={linkclassNames("profile")} to={"/account"}>
         <svg
           xmlns="http://www.w3.org/2000/svg"
           fill="none"
@@ -70,7 +70,7 @@ const AccountNav = () => {
           />
         </svg>
         My Accommodation
-      </Link>
+      </Link> */}
     </nav>
   );
 };
